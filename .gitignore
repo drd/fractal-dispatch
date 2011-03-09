@@ -1,0 +1,21 @@
+# xcode noise
+build/*
+*.pbxuser
+*.mode?v3
+*.perspectivev3
+
+# old skool
+.svn
+
+# osx noise
+.DS_Store
+profile
+help_pages/.Python
+help_pages/bin/
+help_pages/include/
+help_pages/lib/
+
+
+# hmmm
+0000
+ikon-images
