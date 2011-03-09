@@ -12,6 +12,8 @@
 
 #define ASYNC
 #define N 2
+#define _DIST
+#define ITERATIONS 64
 
 #if DEBUG
 #define GLDEBUG() if(glGetError() != GL_NO_ERROR){NSLog(@"glError: %d caught at %s:%u\n", glGetError(), __FILE__, __LINE__);}
@@ -40,7 +42,25 @@
 		re_width = 4.0;
 		im_height = 3.0;
 		
+		iterBase = 0;
+		
 		glLock = [[NSLock alloc] init];
+		
+		colorTable = (rawBitmap) malloc(ITERATIONS * sizeof(pixel));
+		
+		float ct = 0, dct = 0.1 *  M_PI / ITERATIONS;
+		for(int i = 0; i < ITERATIONS; i++) {
+			int r, g, b;
+			
+			b = 255 * fabs(sin(ct * 2 - cos(ct)));
+			r = 255 * fabs(sin(M_PI * cos(ct) - M_PI * sin(3 * ct)));
+			g = 127 * fabs(cos(ct / 3)) + 128 * fabs(sin(M_PI - ct));
+			
+//			bitmap[(y_base + y) * rowPix + x_base + x] = (256 - i & 0xff) | ((i & 0xff) << 8) | ((i & 0xff) << 16);
+			colorTable[i] = r | (g << 8) | (b << 16);
+			
+			ct += dct;
+		}
 	}
     
 	return self;
@@ -93,8 +113,8 @@
 	int block_width = size.width / N;
 	int block_height = size.height / N;
 	
-	double c_re = re_seed + 0.3 * cos(time);
-	double c_im = im_seed + 0.3 * sin(time);
+	double c_re = re_seed + 0.3 * cos(time * 2.0) - 0.5 * sin(time * 0.5 - .3);
+	double c_im = im_seed + 0.3 * sin(time * 1.5) + 0.75 *cos(1 - time);
 	time += dt;
 	
 	NSOpenGLContext *nsOGLContext = [self openGLContext];
@@ -116,13 +136,21 @@
 
 				double re, re_0 = re_center - re_width / 2.0 + x_base * d_re;
 				double im = im_center - im_height / 2.0 + y_base * d_im;
-
+				
+#ifdef DIST
+				double dmin = 999999, dmax = -999999;
+#endif DIST
+				
 				re = re_0;
 				
 				for (int y = 0; y < block_height; y++) {
 					for (int x = 0; x < block_width; x++) {
 						double zx, zy;
 						double zx2, zy2;
+						
+#ifdef DIST
+						double dzx = 0, dzy = 0;
+#endif DIST
 						
 						zx = re;
 						zy = im;
@@ -131,10 +159,17 @@
 						
 						int i = 0;
 
-						while (i < 256 && zx2 + zy2 < 4)
+						while (i < ITERATIONS && zx2 + zy2 < 4)
 						{
 							zy = 2 * zx * zy + c_im;
 							zx = zx2 - zy2 + c_re;
+							
+#ifdef DIST
+							double dzxt = dzx;
+							
+							dzx = 2 * (zx * dzx - zy * dzy) + 1;
+							dzy = 2 * (zy * dzxt + dzy * zx);
+#endif DIST
 							
 							zx2 = zx * zx;
 							zy2 = zy * zy;
@@ -142,7 +177,21 @@
 							i++;
 						}
 						
-						bitmap[(y_base + y) * rowPix + x_base + x] = (256 - i & 0xff) | ((i & 0xff) << 8) | ((i & 0xff) << 16);
+#ifdef DIST
+						double mz = zx*zx + zy*zy;
+						double mdz = dzx*dzx + dzy*dzy;
+						
+						double dist = log(mz*mz)*mz / mdz;
+						
+						if (dist > dmax) {
+							dmax = dist;
+						}
+						if (dist < dmin) {
+							dmin = dist;
+						}
+#endif DIST
+						
+						bitmap[(y_base + y) * rowPix + x_base + x] = colorTable[(i + iterBase) % ITERATIONS]; // (256 - i & 0xff) | ((i & 0xff) << 8) | ((i & 0xff) << 16);
 						
 						re += d_re;
 					}
@@ -150,6 +199,10 @@
 					re = re_0;
 					im += d_im;
 				}
+
+#ifdef DIST
+				NSLog(@"max: %f min: %f", dmax, dmin);
+#endif DIST
 
 #ifdef ASYNC
 			});
@@ -183,6 +236,7 @@
 		
 		NSLog(@"unlocking %d", toUnlock);
 		[textureLocks[toUnlock] unlock];
+//		iterBase++;
 		NSLog(@"unlocked %d", toUnlock);
 		
 		

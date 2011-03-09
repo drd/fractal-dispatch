@@ -15,6 +15,9 @@
 	double re_center, im_center, re_width, im_height;
 	double re_seed, im_seed;
 	
+	int iterBase;
+	rawBitmap colorTable;
+	
 	NSLock *glLock;
 }
 

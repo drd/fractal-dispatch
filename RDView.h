@@ -3,7 +3,8 @@
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/OpenGL.h>
 
-typedef UInt32 * rawBitmap;
+typedef UInt32 pixel;
+typedef pixel * rawBitmap;
 
 @interface RDView : NSOpenGLView
 {
