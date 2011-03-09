@@ -18,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		07708DF713277F1E00C37BAB /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
 		07C37C9E131AE34000D22CB5 /* julia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = julia.h; sourceTree = "<group>"; };
 		07C37C9F131AE34000D22CB5 /* julia.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = julia.m; sourceTree = "<group>"; };
 		07C37CCF131AF54000D22CB5 /* RDView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RDView.h; sourceTree = "<group>"; };
@@ -114,6 +115,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				07708DF713277F1E00C37BAB /* README.md */,
 				8D1107310486CEB800E47090 /* fractalgcd-Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				1DDD58140DA1D0A300B32029 /* MainMenu.xib */,
